@@ -274,4 +274,22 @@ public class Generateur {
         }
         return code.toString();
     }
+
+    public String genererData(Tds[] tds){
+        StringBuffer code=new StringBuffer();
+        code.append("");
+        for (Tds e : tds){
+            if(e.getType()== Tds.Type.entier && e.getCat()== Tds.Categorie.global){
+                code.append(e.getNom());
+                code.append(":LONG()"+e.getVal());
+            }
+        }
+        return code.toString();
+    }
+    public String genererEcriture(Noeud a){
+        StringBuffer code=new StringBuffer();
+        code.append(genererExpression(a.getFils(0)));
+        code.append("\tPOP(R0)\nWRINT()");
+        return code.toString();
+    }
 }
