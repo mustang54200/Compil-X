@@ -1,30 +1,25 @@
 package fr.ul.miage.generation;
 
 import fr.ul.miage.arbre.*;
+import fr.ul.miage.tds.Symbole;
 import fr.ul.miage.tds.Tds;
 
 import java.util.List;
 
-/**
- * Générateur de code pour un arbre d'affectation
- */
 public class Generateur {
-    /**
-     * Générer le code pour une affectation
-     * @param aff : noeud d'affectation
-     * @return code généré
-     */
+
     public String genererProgramme(Noeud pgr, Tds tableDesSymboles) {
         StringBuffer code = new StringBuffer();
 
         code.append(".include beta.uasm\n");
         code.append(".include intio.uasm\n");
 
-        // genererData(tds) -> String (mets les variables du tds dans le code assembly)
-
         code.append("CMOVE(pile, SP\n");
         code.append("BR(debut)\n");
         code.append("debut: ");
+
+        genererData(tableDesSymboles);
+
         code.append("CALL(main)\nHALT\n");
 
         for (Noeud func: pgr.getFils()) {
@@ -45,14 +40,14 @@ public class Generateur {
             case SI: code.append(genererSi((Si) n.getFils().get(0), tableDesSymboles));
             case TQ: code.append(genererTantQue(n.getFils().get(0), tableDesSymboles));
             case ECR: code.append(genererEcriture(n.getFils().get(0)));
-            case APPEL: code.append(genererAppel(n.getFils().get(0)));
+            case APPEL: code.append(genererAppel((Fonction) n.getFils(), tableDesSymboles));
         }
 
         return code.toString();
     }
 
-    public String genererFonction(Noeud fonct, Tds tableDesSymboles) {
-        StringBuffer code = new StringButter();
+    public String genererFonction(Noeud fonct, Symbole tableDesSymboles) {
+        StringBuffer code = new StringBuffer();
         code.append(fonct.toString());
 
         code.append("\tPUSH(LP)\n");
@@ -129,11 +124,6 @@ public class Generateur {
         code.append("\tST(R0, " + var.getValeur() + ")\n");
         return code.toString();
     }
-    /**
-     * Générer le code pour une expression
-     * @param expr : noeud d'expression
-     * @return code généré
-     */
 
     public String genererCondition(Noeud arbre) {
         StringBuffer code = new StringBuffer();
@@ -275,11 +265,11 @@ public class Generateur {
         return code.toString();
     }
 
-    public String genererData(Tds[] tds){
+    public String genererData(Tds tds){
         StringBuffer code=new StringBuffer();
         code.append("");
-        for (Tds e : tds){
-            if(e.getType()== Tds.Type.entier && e.getCat()== Tds.Categorie.global){
+        for (Symbole e : tds.getTable()){
+            if(e.getType()== Symbole.Type.entier && e.getCat()== Symbole.Categorie.global){
                 code.append(e.getNom());
                 code.append(":LONG()"+e.getVal());
             }
@@ -290,6 +280,19 @@ public class Generateur {
         StringBuffer code=new StringBuffer();
         code.append(genererExpression(a.getFils(0)));
         code.append("\tPOP(R0)\nWRINT()");
+        return code.toString();
+    }
+
+    public String genererAppel(Fonction a,Tds tableDesSymboles){
+        StringBuffer code=new StringBuffer();
+        if(a.getValeur()!=null){
+            code.append("ALLOCATE(1)");
+        }
+        for(Noeud f: a.getFils()){
+            code.append(genererExpression(f));
+        }
+        code.append("CALL("+a.getValeur()+")");
+        code.append("DEALLOCATE("+tableDesSymboles.getNbParam()+")");
         return code.toString();
     }
 }
