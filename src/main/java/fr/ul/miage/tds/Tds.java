@@ -10,6 +10,12 @@ public class Tds {
         return  this.table;
     }
 
+    public void insertTable(Symbole s){
+
+        this.table.add(s);
+
+    }
+
     public Symbole getSymboleFromName(String name){
         /*
         A partir du nom du noeud, on peut récuperer le symbole associé via son nom

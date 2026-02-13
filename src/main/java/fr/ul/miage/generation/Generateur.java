@@ -19,13 +19,13 @@ public class Generateur {
         code.append(".include beta.uasm\n")
             .append(".include intio.uasm\n");
 
-        code.append("\tCMOVE(pile, SP\n")
+        code.append("\tCMOVE(pile, SP)\n")
             .append("\tBR(debut)\n")
-            .append("debut: ");
+            .append("debut:\n");
 
         code.append(genererData());
 
-        code.append("\TCALL(main)\n")
+        code.append("\tCALL(main)\n")
             .append("\tHALT\n");
 
         for (Noeud func: pgr.getFils()) {
@@ -47,29 +47,44 @@ public class Generateur {
             case TQ: code.append(genererTantQue((TantQue) n.getFils().get(0)));
             case ECR: code.append(genererEcriture((Ecrire) n.getFils().get(0)));
             case APPEL: code.append(genererAppel((Fonction) n.getFils()));
-            case RET: code.append(genererRetour(Retour) n.getFils().get(0));
+            case RET: code.append(genererRetour((Retour) n.getFils().get(0)));
         }
 
         return code.toString();
     }
 
-    public String genererFonction(Noeud fonct) {
+    public String genererFonction(Noeud fo) {
+
         StringBuffer code = new StringBuffer();
-        code.append(fonct.toString());
 
-        code.append("\tPUSH(LP)\n");
-        code.append("\tPUSH(BP)\n");
-        code.append("\tMOVE(SP,BP)\n");
-        code.append("\tALLOCATE(").append(this.tableDesSymboles.getSymboleFromName(fonct.toString()).getNbVar()).append("\n"); // MARCHE PAS CAR IL CONNAIT PAS LE TDS
 
-        for(Noeud f: fonct.getFils()) {
-            code.append(genererInstruction((Fonction) f)); // MARCHE PAS CAR IL CONNAIT PAS GENERER INSTRUCTION
+        if (fo instanceof Fonction fonct) {
+
+            if (fonct.getValeur() instanceof Symbole fonctionSymbole) {
+
+                code.append(fonctionSymbole.getNom() + ":\n");
+
+                code.append("\tPUSH(LP)\n");
+                code.append("\tPUSH(BP)\n");
+                code.append("\tMOVE(SP,BP)\n");
+
+                code.append("\tALLOCATE(").append(fonctionSymbole.getNbLoc()).append(")\n");
+
+                for(Noeud f: fonct.getFils()) {
+                    code.append(genererInstruction((Fonction) f));
+                }
+
+                code.append("ret_").append(fonctionSymbole.getNom()).append(":\n");
+                code.append("\tDEALLOCATE(").append(fonctionSymbole.getNbLoc()).append(")\n")
+                        .append("\tPOP(BP)\n")
+                        .append("\tPOP(LP)\n")
+                        .append("\tRTN()\n");
+
+
+            }
+
+
         }
-
-        code.append("\tDEALLOCATE(").append(this.tableDesSymboles.getSymboleFromName(fonct.toString()).getNbVar()).append("\n") // MARCHE PAS CAR IL CONNAIT PAS LE TDS (PARTIE 2)
-            .append("\tPOP(BP)\n")
-            .append("\tPOP(LP)\n")
-            .append("\tRTN()\n");
 
         return code.toString();
     }
@@ -83,7 +98,7 @@ public class Generateur {
 
         code.append("\tPOP(R0)\n")
             .append("\tPUTFRAME(R0").append(offset * 4).append("\n")
-            .append("\t").append("ret_").append(arbre.toString()).append("\n");
+            .append("\t").append("BR(ret_").append(arbre.toString()).append(")\n");
 
         return code.toString();
     }
@@ -119,6 +134,7 @@ public class Generateur {
 
         code.append(genererBloc(arbre.getFils().get(1)));
 
+        return code.toString();
     }
 
     public String genererBloc(Noeud arbre) {
