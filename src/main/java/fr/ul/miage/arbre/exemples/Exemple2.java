@@ -29,12 +29,12 @@
 
 package fr.ul.miage.arbre.exemples;
 
-import fr.ul.arbre.*;
 import fr.ul.miage.arbre.*;
 
 /**
  * Exemple #2
  */
+/*
 public class Exemple2 {
     public static void main(String[] args) {
         //on crée les noeuds
@@ -69,3 +69,4 @@ public class Exemple2 {
         GuiAfficheur.afficher(prog);
     }
 }
+*/

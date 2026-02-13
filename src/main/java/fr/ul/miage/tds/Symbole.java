@@ -16,7 +16,11 @@ public class Symbole {
     private Integer rang;
     private String scope;
     private Integer nbParam;
-    private Integer nbVar;
+    private Integer nbLoc;
+
+    public Symbole(String nom, Type type, Categorie cat) {
+        this(nom, type, cat, 0);
+    }
 
     public Symbole(String nom, Type type, Categorie cat, Integer val) {
         this.nom = nom;
@@ -25,9 +29,7 @@ public class Symbole {
         this.val = val;
     }
 
-    public Symbole(String nom, Type type, Categorie cat) {
-        this(nom, type, cat, 0);
-    }
+
 
     public Symbole(String nom, Type type, Categorie cat, Integer rang, String scope) {
         this.nom = nom;
@@ -37,13 +39,12 @@ public class Symbole {
         this.scope = scope;
     }
 
-    public Symbole(String nom, Type type, Categorie cat, Integer val, Integer nbParam, Integer nbvar) {
+    public Symbole(String nom, Type type, Categorie cat, Integer nbParam, Integer nbLoc) {
         this.nom = nom;
         this.type = type;
         this.cat = cat;
-        this.val = val;
         this.nbParam = nbParam;
-        this.nbVar = nbvar;
+        this.nbLoc = nbLoc;
     }
     public String getNom() {
         return nom;
@@ -66,8 +67,8 @@ public class Symbole {
     public Integer getNbParam() {
         return nbParam;
     }
-    public Integer getNbVar() {
-        return nbVar;
+    public Integer getNbLoc() {
+        return nbLoc;
     }
 
     public void setNom(String nom) {
@@ -91,8 +92,8 @@ public class Symbole {
     public void setNbParam(Integer nbParam) {
         this.nbParam = nbParam;
     }
-    public void setNbVar(Integer nbvar) {
-        this.nbVar = nbvar;
+    public void setNbLoc(Integer nbLoc) {
+        this.nbLoc = nbLoc;
     }
 
     @Override

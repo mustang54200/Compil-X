@@ -1,4 +1,4 @@
-package fr.ul.miage.generation;
+/*package fr.ul.miage.generation;
 
 import fr.ul.miage.arbre.*;
 
@@ -36,3 +36,4 @@ public class Exemple1 {
         System.out.println(code);
     }
 }
+*/

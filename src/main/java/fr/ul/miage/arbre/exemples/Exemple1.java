@@ -30,7 +30,6 @@
 
 package fr.ul.miage.arbre.exemples;
 
-import fr.ul.arbre.*;
 import fr.ul.miage.arbre.*;
 
 /**
