@@ -40,7 +40,7 @@ public class Exemple6 {
         aff.setFilsDroit(plus);
 
         Multiplication mul = new Multiplication();
-        plus.setFilsGauche(mul);;
+        plus.setFilsGauche(mul);
         mul.setFilsGauche(new Idf(varA_f));
         mul.setFilsDroit(new Const(2));
 
@@ -53,16 +53,17 @@ public class Exemple6 {
         moins.setFilsGauche(new Idf(varB_f));
         moins.setFilsDroit(new Const(5));
 
-        // Retour ret = new Retour(res_f);
-        // f.ajouterUnFils(ret);
+        Retour ret = new Retour(res_f); // object retour (TDS)
+        f.ajouterUnFils(ret);
+        ret.setLeFils(res_f);
 
         Fonction main = new Fonction(fonctionMain);
         prog.ajouterUnFils(main);
         Ecrire ecrire = new Ecrire();
         main.ajouterUnFils(ecrire);
-        // Appel appel = new Appel()
-        // appel.setFilsGauche(new Idf(varA));
-        // appel.setFilsDroit(new Idf(varC));
+        Appel appel = new Appel(fonctionF);
+        appel.ajouterUnFils(new Idf(varA));
+        appel.ajouterUnFils(new Idf(varC));
 
 
         return prog;
