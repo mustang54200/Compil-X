@@ -186,6 +186,12 @@ public class Generateur {
 
                 break;
 
+            case LIRE:
+
+                code.append("\tRDINT()\n\tPUSH(R0)\n");
+
+                break;
+
             case PLUS:
                 Plus p = (Plus) expr;
                 Noeud gaucheP = p.getFilsGauche();
@@ -354,14 +360,15 @@ public class Generateur {
     }
 
 
-    public String genererEcriture(Ecrire arbre){
+    public String genererEcriture(Ecrire ecrire){
         StringBuilder code = new StringBuilder();
 
-        code.append(genererExpression(arbre.getLeFils()))
-            .append("\tPOP(R0)\nWRINT()");
+        code.append(genererExpression(ecrire.getLeFils()))
+            .append("\tPOP(R0)\n\tWRINT()\n");
 
         return code.toString();
     }
+
 
     public String genererAppel(Fonction a){
         StringBuilder code = new StringBuilder();

@@ -46,6 +46,7 @@ public class Symbole {
         this.nbParam = nbParam;
         this.nbLoc = nbLoc;
     }
+
     public String getNom() {
         return nom;
     }
