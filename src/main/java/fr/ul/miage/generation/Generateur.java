@@ -97,14 +97,17 @@ public class Generateur {
         StringBuilder code = new StringBuilder();
         code.append(genererExpression(arbre.getLeFils()));
 
-        Symbole symboleRetourArbre = this.tableDesSymboles.getSymboleFromName(arbre.toString());
-        int offset = 2 + symboleRetourArbre.getNbParam();
+        if (arbre.getValeur() instanceof Symbole symboleRetourArbre) {
+            int offset = 2 + symboleRetourArbre.getNbParam();
 
-        code.append("\tPOP(R0)\n")
-                .append("\tPUTFRAME(R0").append(offset * 4).append("\n")
-                .append("\t").append("BR(ret_").append(arbre.toString()).append(")\n");
+            code.append("\tPOP(R0)\n")
+                    .append("\tPUTFRAME(R0, ").append(offset * 4).append(")\n")
+                    .append("\t").append("BR(ret_").append(symboleRetourArbre.getNom()).append(")\n");
 
-        code.append("\n");
+            code.append("\n");
+        }
+
+
         return code.toString();
     }
 
@@ -258,19 +261,19 @@ public class Generateur {
         StringBuilder code = new StringBuilder();
         List<Noeud> enfantsArbre = si.getFils();
 
-        code.append(si.toString())
+        code.append(si.toString().toLowerCase()).append("\n")
                 .append(genererCondition(enfantsArbre.get(0)));
 
         code.append("\tPOP(R0)\n")
-                .append("\tBF(RO,").append(si.toString()).append("\n"); // "sinon_a.valeur"
+                .append("\tBF(RO, alors_").append(si.toString().toLowerCase()).append("\n"); // "alors_a.valeur"
 
         code.append(genererBloc(enfantsArbre.get(1)));
 
-        code.append("\tBR(fsi,").append(si.toString()).append("\n")  //
-                .append(si.toString()).append(":\n") // "sinon_a.valeur:"
+        code.append("\tBR(fsi_").append(si.toString().toLowerCase()).append("\n")  //
+                .append(si.toString().toLowerCase()).append(":\n") // "sinon_a.valeur:"
                 .append(genererBloc(enfantsArbre.get(2)));
 
-        code.append(si.toString()).append(":\n"); // "fsi_a.valeur:"
+        code.append(si.toString().toLowerCase()).append(":\n"); // "fsi_a.valeur:"
 
         code.append("\n");
         return code.toString();
@@ -295,7 +298,7 @@ public class Generateur {
         StringBuilder code = new StringBuilder();
 
         for(Noeud f: arbre.getFils()) {
-            code.append(genererInstruction((Fonction) f));
+            code.append(genererInstruction(f));
         }
 
         code.append("\n");
