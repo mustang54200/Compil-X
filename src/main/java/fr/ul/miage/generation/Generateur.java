@@ -87,6 +87,7 @@ public class Generateur {
 
 
         }
+
         return code.toString();
     }
 
@@ -103,7 +104,6 @@ public class Generateur {
 
         }
 
-        code.append("\n");
         return code.toString();
     }
 
@@ -272,7 +272,6 @@ public class Generateur {
 
         code.append("fsi_").append(strSi).append(":\n"); // "fsi_si_valeur:"
 
-        code.append("\n");
         return code.toString();
     }
 
@@ -289,7 +288,6 @@ public class Generateur {
 
         code.append("\nftq_").append(strTq).append(":\n"); // "ftq_tq_valeur"
 
-        code.append("\n");
         return code.toString();
     }
 
