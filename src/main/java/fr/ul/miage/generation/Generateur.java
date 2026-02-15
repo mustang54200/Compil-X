@@ -17,15 +17,15 @@ public class Generateur {
         StringBuilder code = new StringBuilder();
 
         code.append(".include beta.uasm\n")
-            .append(".include intio.uasm\n\n");
+            .append(".include intio.uasm\n");
 
-        code.append("init:\n")
+        code.append("\ninit:\n")
             .append("\tCMOVE(pile, SP)\n")
             .append("\tBR(debut)\n");
 
         code.append(genererData());
 
-        code.append("debut:\n")
+        code.append("\ndebut:\n")
             .append("\tCALL(main)\n")
             .append("\tHALT()\n");
 
@@ -34,14 +34,14 @@ public class Generateur {
                 code.append(genererFonction(func));
             }
         }
-        code.append("pile:\n");
+        code.append("\npile:\n");
 
         return code.toString();
     }
 
     public String genererData(){
         StringBuilder code = new StringBuilder();
-        code.append("var:\n");
+        code.append("\nvar:\n");
 
         for (Symbole e : this.tableDesSymboles.getTable()){
             if(e.getType().equals(Symbole.Type.entier)
@@ -51,7 +51,6 @@ public class Generateur {
                         .append("LONG(").append(e.getVal()).append(")\n");
             }
         }
-        code.append("\n");
 
         return code.toString();
     }
@@ -65,7 +64,7 @@ public class Generateur {
 
             if (fonct.getValeur() instanceof Symbole fonctionSymbole) {
 
-                code.append(fonctionSymbole.getNom() + ":\n");
+                code.append("\n").append(fonctionSymbole.getNom()).append(":\n");
 
                 code.append("\tPUSH(LP)\n");
                 code.append("\tPUSH(BP)\n");
@@ -88,8 +87,6 @@ public class Generateur {
 
 
         }
-        code.append("\n");
-
         return code.toString();
     }
 
@@ -104,10 +101,9 @@ public class Generateur {
                     .append("\tPUTFRAME(R0, ").append(offset * 4).append(")\n")
                     .append("\t").append("BR(ret_").append(symboleRetourArbre.getNom()).append(")\n");
 
-            code.append("\n");
         }
 
-
+        code.append("\n");
         return code.toString();
     }
 
@@ -162,7 +158,6 @@ public class Generateur {
 
         }
 
-        code.append("\n");
         return code.toString();
     }
 
@@ -260,20 +255,22 @@ public class Generateur {
     public String genererSi(Si si) {
         StringBuilder code = new StringBuilder();
         List<Noeud> enfantsArbre = si.getFils();
+        String strSi = si.toString().toLowerCase().replace('/', '_');
 
-        code.append(si.toString().toLowerCase()).append("\n")
-                .append(genererCondition(enfantsArbre.get(0)));
+        code.append("\n").append(strSi).append(":\n") // "si_valeur"
+                .append(genererCondition(enfantsArbre.get(0))); // condition si
 
-        code.append("\tPOP(R0)\n")
-                .append("\tBF(RO, alors_").append(si.toString().toLowerCase()).append("\n"); // "alors_a.valeur"
+        code.append("\tPOP(R0)\n") // récupérer le résultat de la condition
+                .append("\tBF(RO, sinon_").append(strSi).append(")\n"); // aller à "sinon_si_valeur" ou rester sur "alors_si/valeur"
 
-        code.append(genererBloc(enfantsArbre.get(1)));
+        code.append("\nalors_").append(strSi).append(":\n") // "alors_si_valeur"
+                .append(genererBloc(enfantsArbre.get(1))) // bloc alors
+                .append("\tBR(fsi_").append(strSi).append(")\n");  // aller à "fsi_si_valeur"
 
-        code.append("\tBR(fsi_").append(si.toString().toLowerCase()).append("\n")  //
-                .append(si.toString().toLowerCase()).append(":\n") // "sinon_a.valeur:"
-                .append(genererBloc(enfantsArbre.get(2)));
+        code.append("\nsinon_").append(strSi).append(":\n") // "sinon_si_valeur:"
+                .append(genererBloc(enfantsArbre.get(2))); // bloc sinon
 
-        code.append(si.toString().toLowerCase()).append(":\n"); // "fsi_a.valeur:"
+        code.append("fsi_").append(strSi).append(":\n"); // "fsi_si_valeur:"
 
         code.append("\n");
         return code.toString();
@@ -282,13 +279,15 @@ public class Generateur {
 
     public String genererTantQue(TantQue tq) {
         StringBuilder code = new StringBuilder();
+        String strTq = tq.toString().toLowerCase().replace('/', '_');
 
-        code.append(tq.toString()).append(":\n");
-        code.append(genererCondition(tq.getFils().get(0)));
+        code.append("\n").append(strTq).append(":\n") // "tq_valeur"
+                .append(genererCondition(tq.getFils().get(0))); // condition
 
-        code.append("\tBF(R0").append(tq.toString()).append(")\n"); // "ftq_a.valeur"
+        code.append("\tBF(R0, ftq_").append(strTq).append(")\n") // aller à "ftq_tq_valeur" ou exécuter le bloc suivant
+                .append(genererBloc(tq.getFils().get(1))); // bloc
 
-        code.append(genererBloc(tq.getFils().get(1)));
+        code.append("\nftq_").append(strTq).append(":\n"); // "ftq_tq_valeur"
 
         code.append("\n");
         return code.toString();
@@ -301,7 +300,6 @@ public class Generateur {
             code.append(genererInstruction(f));
         }
 
-        code.append("\n");
         return code.toString();
     }
 
@@ -364,10 +362,12 @@ public class Generateur {
 
 
     public String genererEcriture(Ecrire ecrire){
-        StringBuilder code = new StringBuilder();
+        StringBuilder code;
+        code = new StringBuilder();
 
         code.append(genererExpression(ecrire.getLeFils()))
-            .append("\tPOP(R0)\n\tWRINT()\n");
+                .append("\tPOP(R0)\n")
+                .append("\tWRINT()\n");
 
         return code.toString();
     }
@@ -384,8 +384,9 @@ public class Generateur {
             code.append(genererExpression(f));
         }
 
-        code.append("CALL(").append(a.getValeur()).append(")")
-            .append("DEALLOCATE("+ this.tableDesSymboles.getSymboleFromName(a.toString()).getNbParam()+")");
+        code.append("CALL(").append(a.getValeur()).append(")\n")
+                .append("DEALLOCATE(").append(this.tableDesSymboles.getSymboleFromName(a.toString()).getNbParam()).append(")");
+
         return code.toString();
     }
 }

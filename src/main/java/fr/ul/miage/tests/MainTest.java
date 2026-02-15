@@ -9,7 +9,7 @@ public class MainTest {
     public static void main(String[] args) {
 
         Tds tds = new Tds();
-        Noeud prog = Exemple7.initialiserCompilateur(tds);
+        Noeud prog = Exemple8.initialiserCompilateur(tds);
 
         System.out.println("Arbre source :\n");
         TxtAfficheur.afficher(prog);

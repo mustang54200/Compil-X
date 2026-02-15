@@ -25,7 +25,4 @@ public class Exemple1 {
         return prog;
     }
 
-
-
-
 }

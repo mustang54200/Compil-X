@@ -51,5 +51,4 @@ public class Exemple4 {
         return prog;
     }
 
-
 }

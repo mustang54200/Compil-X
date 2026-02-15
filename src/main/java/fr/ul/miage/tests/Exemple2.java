@@ -33,7 +33,4 @@ public class Exemple2 {
         return prog;
     }
 
-
-
-
 }

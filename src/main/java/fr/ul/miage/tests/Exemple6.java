@@ -67,7 +67,4 @@ public class Exemple6 {
         return prog;
     }
 
-
-
-
 }
