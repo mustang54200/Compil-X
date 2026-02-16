@@ -48,7 +48,7 @@ public class Generateur {
                     && e.getCat().equals(Symbole.Categorie.global)) {
 
                 code.append("\t").append(e.getNom()).append(":")
-                        .append("LONG(").append(e.getVal()).append(")\n");
+                    .append("LONG(").append(e.getVal()).append(")\n");
             }
         }
 
@@ -61,33 +61,28 @@ public class Generateur {
 
 
         if (fo instanceof Fonction fonct) {
-
             if (fonct.getValeur() instanceof Symbole fonctionSymbole) {
 
                 code.append("\n").append(fonctionSymbole.getNom()).append(":\n");
 
-                code.append("\tPUSH(LP)\n");
-                code.append("\tPUSH(BP)\n");
-                code.append("\tMOVE(SP,BP)\n");
+                code.append("\tPUSH(LP)\n")
+                    .append("\tPUSH(BP)\n")
+                    .append("\tMOVE(SP,BP)\n")
 
-                code.append("\tALLOCATE(").append(fonctionSymbole.getNbLoc()).append(")\n");
+                    .append("\tALLOCATE(").append(fonctionSymbole.getNbLoc()).append(")\n");
 
                 for(Noeud f: fonct.getFils()) {
                     code.append(genererInstruction(f));
                 }
 
-                code.append("ret_").append(fonctionSymbole.getNom()).append(":\n");
-                code.append("\tDEALLOCATE(").append(fonctionSymbole.getNbLoc()).append(")\n")
-                        .append("\tPOP(BP)\n")
-                        .append("\tPOP(LP)\n")
-                        .append("\tRTN()\n");
+                code.append("ret_").append(fonctionSymbole.getNom()).append(":\n")
 
-
+                    .append("\tDEALLOCATE(").append(fonctionSymbole.getNbLoc()).append(")\n")
+                    .append("\tPOP(BP)\n")
+                    .append("\tPOP(LP)\n")
+                    .append("\tRTN()\n");
             }
-
-
         }
-
         return code.toString();
     }
 
@@ -99,65 +94,57 @@ public class Generateur {
             int offset = 2 + symboleRetourArbre.getNbParam();
 
             code.append("\tPOP(R0)\n")
-                    .append("\tPUTFRAME(R0, ").append(offset * 4).append(")\n")
-                    .append("\t").append("BR(ret_").append(symboleRetourArbre.getNom()).append(")\n");
-
+                .append("\tPUTFRAME(R0, ").append(- offset * 4).append(")\n")
+                .append("\t").append("BR(ret_").append(symboleRetourArbre.getNom()).append(")\n");
         }
-
         return code.toString();
     }
 
     public String genererInstruction(Noeud n) {
         StringBuilder code = new StringBuilder();
-
         switch (n.getCat()) {
-
             case AFF:
                 code.append(genererAffectation((Affectation) n));
                 break;
-
             case SI:
                 code.append(genererSi((Si) n));
                 break;
-
             case TQ:
                 code.append(genererTantQue((TantQue) n));
                 break;
-
             case ECR:
                 code.append(genererEcriture((Ecrire) n));
                 break;
-
             case APPEL:
-                code.append(genererAppel((Fonction) n));
+                code.append(genererAppel((Appel) n));
                 break;
-
             case RET:
                 code.append(genererRetour((Retour) n));
                 break;
-
             default:
                 break;
         }
-
         return code.toString();
     }
-
 
     public String genererAffectation(Affectation aff) {
         StringBuilder code = new StringBuilder();
 
         code.append(genererExpression(aff.getFilsDroit()))
-                .append("\tPOP(R0)\n");
+            .append("\tPOP(R0)\n");
 
         Idf var = (Idf) aff.getFilsGauche();
-
         if (var.getValeur() instanceof Symbole variable) {
 
-            code.append("\tST(R0, ").append(variable.getNom()).append(")\n");
+            if (variable.getCat().equals(Symbole.Categorie.local)) {
+                int offset = 1 + variable.getRang();
+                code.append("\tPUTFRAME(R0, ").append(offset * 4).append(")\n");
 
+            } else if (variable.getCat().equals(Symbole.Categorie.global)) {
+                code.append("\tST(R0, ").append(variable.getNom()).append(")\n");
+            }
         }
-
+        code.append("\n");
         return code.toString();
     }
 
@@ -168,22 +155,30 @@ public class Generateur {
             case CONST:
                 Const c = (Const) expr;
 
-                code.append("\tCMOVE(R0, ").append(c.getValeur()).append(")\n")
-                        .append("\tPUSH(R0)\n\n");
+                code.append("\tCMOVE(").append(c.getValeur()).append(", R0)\n")
+                    .append("\tPUSH(R0)\n\n");
                 break;
-
             case IDF:
                 Idf i = (Idf) expr;
 
                 if (i.getValeur() instanceof Symbole idf) {
+                    if (idf.getCat().equals(Symbole.Categorie.global)) {
+                        code.append("\tLD(").append(idf.getNom()).append(", R0)\n")
+                        .append("\tPUSH(R0)\n\n");
 
-                    code.append("\tLD(").append(idf.getNom()).append(", R0)\n")
-                            .append("\tPUSH(R0)\n\n");
+                    } else if (idf.getCat().equals(Symbole.Categorie.local)) { // comment vérifier le scope ?
+                        int offset = 1 + idf.getRang();
+                        code.append("\tGETFRAME(").append(offset*4).append(", R0)\n")
+                            .append("\tPUSH(R0)\n");
 
+                    } else if (idf.getCat().equals(Symbole.Categorie.param)) {
+                        int offset = - 1 - idf.getScope().getNbParam() + idf.getRang();
+                        code.append("\tGETFRAME(").append(offset*4).append(", R0)\n")
+                                .append(idf.getNom())
+                            .append("\tPUSH(R0)\n");
+                    }
                 }
-
                 break;
-
             case LIRE:
 
                 code.append("\tRDINT()\n\tPUSH(R0)\n");
@@ -196,12 +191,12 @@ public class Generateur {
                 Noeud droitP = p.getFilsDroit();
 
                 code.append(genererExpression(gaucheP))
-                        .append(genererExpression(droitP));
+                    .append(genererExpression(droitP));
 
                 code.append("\tPOP(R2)\n")
-                        .append("\tPOP(R1)\n")
-                        .append("\tADD(R1, R2, R3)\n")
-                        .append("\tPUSH(R3)\n\n");
+                    .append("\tPOP(R1)\n")
+                    .append("\tADD(R1, R2, R3)\n")
+                    .append("\tPUSH(R3)\n\n");
                 break;
 
             case MOINS:
@@ -210,12 +205,12 @@ public class Generateur {
                 Noeud droitM = m.getFilsDroit();
 
                 code.append(genererExpression(gaucheM))
-                        .append(genererExpression(droitM));
+                    .append(genererExpression(droitM));
 
                 code.append("\tPOP(R2)\n")
-                        .append("\tPOP(R1)\n")
-                        .append("\tSUB(R1, R2, R3)\n")
-                        .append("\tPUSH(R3)\n\n");
+                    .append("\tPOP(R1)\n")
+                    .append("\tSUB(R1, R2, R3)\n")
+                    .append("\tPUSH(R3)\n\n");
                 break;
 
             case MUL:
@@ -224,12 +219,12 @@ public class Generateur {
                 Noeud droitMul = mul.getFilsDroit();
 
                 code.append(genererExpression(gaucheMul))
-                        .append(genererExpression(droitMul));
+                    .append(genererExpression(droitMul));
 
                 code.append("\tPOP(R2)\n")
-                        .append("\tPOP(R1)\n")
-                        .append("\tMUL(R1, R2, R3)\n")
-                        .append("\tPUSH(R3)\n\n");
+                    .append("\tPOP(R1)\n")
+                    .append("\tMUL(R1, R2, R3)\n")
+                    .append("\tPUSH(R3)\n\n");
                 break;
 
             case DIV:
@@ -238,13 +233,18 @@ public class Generateur {
                 Noeud droitD = div.getFilsDroit();
 
                 code.append(genererExpression(gaucheD))
-                        .append(genererExpression(droitD));
+                    .append(genererExpression(droitD));
 
                 code.append("\tPOP(R2)\n")
-                        .append("\tPOP(R1)\n")
-                        .append("\tDIV(R1, R2, R3)\n")
-                        .append("\tPUSH(R3)\n\n");
+                    .append("\tPOP(R1)\n")
+                    .append("\tDIV(R1, R2, R3)\n")
+                    .append("\tPUSH(R3)\n\n");
                 break;
+
+            case APPEL:
+                code.append(genererInstruction(expr));
+                break;
+
 
             default:
                 break;
@@ -258,33 +258,35 @@ public class Generateur {
         String strSi = si.toString().toLowerCase().replace('/', '_');
 
         code.append("\n").append(strSi).append(":\n") // "si_valeur"
-                .append(genererCondition(enfantsArbre.get(0))); // condition si
+            .append(genererCondition(enfantsArbre.get(0))); // condition si
 
         code.append("\tPOP(R0)\n") // récupérer le résultat de la condition
-                .append("\tBF(RO, sinon_").append(strSi).append(")\n"); // aller à "sinon_si_valeur" ou rester sur "alors_si/valeur"
+            .append("\tBF(R0, sinon_").append(strSi).append(")\n"); // aller à "sinon_si_valeur" ou rester sur "alors_si/valeur
 
-        code.append("\nalors_").append(strSi).append(":\n") // "alors_si_valeur"
+        if (enfantsArbre.get(1) != null) { // bloc alors existe : faire machin
+            code.append("\nalors_").append(strSi).append(":\n") // "alors_si_valeur"
                 .append(genererBloc(enfantsArbre.get(1))) // bloc alors
                 .append("\tBR(fsi_").append(strSi).append(")\n");  // aller à "fsi_si_valeur"
-
-        code.append("\nsinon_").append(strSi).append(":\n") // "sinon_si_valeur:"
+        }
+        if (enfantsArbre.get(2) != null) { // bloc sinon existe : faire machin
+            code.append("\nsinon_").append(strSi).append(":\n") // "sinon_si_valeur:"
                 .append(genererBloc(enfantsArbre.get(2))); // bloc sinon
+        }
 
         code.append("fsi_").append(strSi).append(":\n"); // "fsi_si_valeur:"
 
         return code.toString();
     }
 
-
     public String genererTantQue(TantQue tq) {
         StringBuilder code = new StringBuilder();
         String strTq = tq.toString().toLowerCase().replace('/', '_');
 
         code.append("\n").append(strTq).append(":\n") // "tq_valeur"
-                .append(genererCondition(tq.getFils().get(0))); // condition
+            .append(genererCondition(tq.getFils().get(0))); // condition
 
         code.append("\tBF(R0, ftq_").append(strTq).append(")\n") // aller à "ftq_tq_valeur" ou exécuter le bloc suivant
-                .append(genererBloc(tq.getFils().get(1))); // bloc
+            .append(genererBloc(tq.getFils().get(1))); // bloc
 
         code.append("\nftq_").append(strTq).append(":\n"); // "ftq_tq_valeur"
 
@@ -311,7 +313,7 @@ public class Generateur {
 
                 code.append("\tPOP(R1)\n")
                     .append("\tPOP(R2)\n")
-                    .append("\tCMPLT(R2,R1,R3)\n")
+                    .append("\tCMPLT(R1, R2, R3)\n")
                     .append("\tPUSH(R3)\n");
                 break;
 
@@ -321,7 +323,7 @@ public class Generateur {
 
                 code.append("\tPOP(R1)\n")
                     .append("\tPOP(R2)\n")
-                    .append("\tCMPLE(R2,R1,R3)\n")
+                    .append("\tCMPLE(R1, R2, R3)\n")
                     .append("\tPUSH(R3)\n");
                 break;
 
@@ -331,7 +333,7 @@ public class Generateur {
 
                 code.append("\tPOP(R1)\n")
                     .append("\tPOP(R2)\n")
-                    .append("\tCMPL(R1,R2,R3)\n")
+                    .append("\tCMPLT(R2, R1, R3)\n")
                     .append("\tPUSH(R3)\n");
                 break;
 
@@ -341,7 +343,7 @@ public class Generateur {
 
                 code.append("\tPOP(R1)\n")
                     .append("\tPOP(R2)\n")
-                    .append("\tCMPLT(R1,R2,R3)\n")
+                    .append("\tCMPLE(R2, R1, R3)\n")
                     .append("\tPUSH(R3)\n");
                 break;
 
@@ -353,7 +355,7 @@ public class Generateur {
                     .append("\tPOP(R2)\n")
                     .append("\tCMPEQ(R1,R2,R3)\n")
                     .append("\tPUSH(R3)\n");
-
+                break;
         }
         return code.toString();
     }
@@ -364,26 +366,28 @@ public class Generateur {
         code = new StringBuilder();
 
         code.append(genererExpression(ecrire.getLeFils()))
-                .append("\tPOP(R0)\n")
-                .append("\tWRINT()\n");
+            .append("\tPOP(R0)\n")
+            .append("\tWRINT()\n");
 
         return code.toString();
     }
 
 
-    public String genererAppel(Fonction a){
+    public String genererAppel(Appel a){
         StringBuilder code = new StringBuilder();
 
         if(a.getValeur() != null){
-            code.append("ALLOCATE(1)");
+            code.append("\tALLOCATE(1)\n");
         }
 
         for(Noeud f: a.getFils()){
             code.append(genererExpression(f));
         }
+        if (a.getValeur() instanceof Symbole symboleFonction) {
+            code.append("\tCALL(").append(symboleFonction.getNom()).append(")\n")
+                    .append("\tDEALLOCATE(").append(symboleFonction.getNbParam()).append(")\n");
 
-        code.append("CALL(").append(a.getValeur()).append(")\n")
-                .append("DEALLOCATE(").append(this.tableDesSymboles.getSymboleFromName(a.toString()).getNbParam()).append(")");
+        }
 
         return code.toString();
     }

@@ -1,5 +1,7 @@
 package fr.ul.miage.tds;
 
+import fr.ul.miage.arbre.Fonction;
+
 public class Symbole {
     public enum Categorie {
         fonction, global, param, local
@@ -14,7 +16,7 @@ public class Symbole {
     private Categorie cat;
     private Integer val;
     private Integer rang;
-    private String scope;
+    private Symbole scope;
     private Integer nbParam;
     private Integer nbLoc;
 
@@ -31,10 +33,10 @@ public class Symbole {
 
 
 
-    public Symbole(String nom, Type type, Categorie cat, Integer rang, String scope) {
+    public Symbole(String nom, Type type, Categorie cat, Integer rang, Symbole scope) {
         this.nom = nom;
         this.type = type;
-        this.cat = Categorie.param;
+        this.cat = cat;
         this.rang = rang;
         this.scope = scope;
     }
@@ -62,7 +64,7 @@ public class Symbole {
     public Integer getRang() {
         return rang;
     }
-    public String getScope() {
+    public Symbole getScope() {
         return scope;
     }
     public Integer getNbParam() {
@@ -87,7 +89,7 @@ public class Symbole {
     public void setRang(Integer rang) {
         this.rang = rang;
     }
-    public void setScope(String scope) {
+    public void setScope(Symbole scope) {
         this.scope = scope;
     }
     public void setNbParam(Integer nbParam) {

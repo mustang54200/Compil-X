@@ -13,7 +13,7 @@ public class Exemple9 {
         // tds
         Symbole fonctionMain = new Symbole("main", Symbole.Type.vide, Symbole.Categorie.fonction, 0, 0);
         Symbole fonctionF = new Symbole("f", Symbole.Type.entier, Symbole.Categorie.fonction, 1, 0);
-        Symbole varA = new Symbole("a", Symbole.Type.entier, Symbole.Categorie.param, 0, "f");
+        Symbole varA = new Symbole("a", Symbole.Type.entier, Symbole.Categorie.param, 0, fonctionF);
 
         tds.insertTable(fonctionMain);
         tds.insertTable(fonctionF);
@@ -47,7 +47,6 @@ public class Exemple9 {
         infEq.setFilsDroit(new Const(0));
 
         si.setBlocAlors(bloc);
-        si.setBlocSinon(bloc); // ???
         bloc.ajouterUnFils(retSi);
         retSi.setLeFils(new Const(0));
 

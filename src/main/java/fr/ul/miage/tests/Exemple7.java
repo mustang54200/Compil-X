@@ -14,8 +14,8 @@ public class Exemple7 {
         // tds
         Symbole fonctionMain = new Symbole("main", Symbole.Type.vide, Symbole.Categorie.fonction, 0, 0);
         Symbole varA = new Symbole("a", Symbole.Type.entier, Symbole.Categorie.global, 1);
-        Symbole varB = new Symbole("c", Symbole.Type.entier, Symbole.Categorie.global, 2);
-        Symbole varX = new Symbole("c", Symbole.Type.entier, Symbole.Categorie.global);
+        Symbole varB = new Symbole("b", Symbole.Type.entier, Symbole.Categorie.global, 2);
+        Symbole varX = new Symbole("x", Symbole.Type.entier, Symbole.Categorie.global);
 
         tds.insertTable(fonctionMain);
         tds.insertTable(varA);

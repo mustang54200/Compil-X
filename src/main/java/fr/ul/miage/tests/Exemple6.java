@@ -16,9 +16,9 @@ public class Exemple6 {
         Symbole fonctionF = new Symbole("f", Symbole.Type.entier, Symbole.Categorie.fonction, 2, 1);
         Symbole varA = new Symbole("a", Symbole.Type.entier, Symbole.Categorie.global, 100);
         Symbole varC = new Symbole("c", Symbole.Type.entier, Symbole.Categorie.global, 170);
-        Symbole varA_f = new Symbole("a_f", Symbole.Type.entier, Symbole.Categorie.param, 0, "f");
-        Symbole varB_f = new Symbole("b_f", Symbole.Type.entier, Symbole.Categorie.param, 1, "f");
-        Symbole varRes_f = new Symbole("Res_f", Symbole.Type.entier, Symbole.Categorie.local, 0, "f");
+        Symbole varA_f = new Symbole("a_f", Symbole.Type.entier, Symbole.Categorie.param, 0, fonctionF);
+        Symbole varB_f = new Symbole("b_f", Symbole.Type.entier, Symbole.Categorie.param, 1, fonctionF);
+        Symbole varRes_f = new Symbole("Res_f", Symbole.Type.entier, Symbole.Categorie.local, 0, fonctionF);
 
         tds.insertTable(fonctionMain);
         tds.insertTable(fonctionF);
